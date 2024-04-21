@@ -29,7 +29,8 @@ class Detection(QThread):
         
         # cap = cv2.VideoCapture(0)
         
-        cap = cv2.VideoCapture('VIDEO\Weaponized_2.avi')
+        cap = cv2.VideoCapture(0)
+        cap.set(cv2.CAP_PROP_BUFFERSIZE, 3)
         # cap.open('https://videos3.earthcam.com/fecnetwork/9974.flv/chunklist_w1421640637.m3u8')
         try:
             while self.running:
@@ -49,7 +50,9 @@ class Detection(QThread):
                         for detection in out:
                             scores = detection[5:]
                             class_id = np.unravel_index(np.argmax(scores), scores.shape)
+                            print(class_id)
                             confidence = scores[class_id]
+                            print(confidence)
 
                             if confidence > 0.9:
                                 center_x = int(detection[0] * width)

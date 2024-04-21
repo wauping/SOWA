@@ -21,7 +21,7 @@ class SettingsWindow(QMainWindow):
             self.detection_window.create_detection_instance()
             self.detection_window.start_detection()
 
-    def close_event(self, event):
+    def closeEvent(self, event):
         if self.detection_window.isVisible():
             self.detection_window.detection.running = False
             self.detection_window.close()
