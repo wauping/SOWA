@@ -16,11 +16,11 @@ class DetectionWindow(QMainWindow):
         self.detection = Detection()
 
     @pyqtSlot(QImage)
-    def set_image(self, image):
+    def setImage(self, image):
         self.label_detection.setPixmap(QPixmap.fromImage(image))
 
     def start_detection(self):
-        self.detection.changePixmap.connect(self.set_image)
+        self.detection.changePixmap.connect(self.setImage)
         self.detection.start()
         self.show()
 

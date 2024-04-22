@@ -6,7 +6,7 @@ from settings_window import SettingsWindow
 class LoginWindow(QMainWindow):
     def __init__(self):
         super(LoginWindow, self).__init__()
-        loadUi('UI\login_window.ui', self)
+        loadUi('UI/login_window.ui', self)
 
         self.register_button.clicked.connect(self.direct_to_register_page)
         self.login_button.clicked.connect(self.open_settings_window)
