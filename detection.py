@@ -51,7 +51,7 @@ class Detection(QThread):
                     confidence = outs[0][0][4][i]  
                     
 
-                    if confidence > 0.3:
+                    if confidence > 0.2:
                         center_x = int(x)
                         center_y = int(y)
                         w = int(w)
