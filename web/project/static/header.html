@@ -1,0 +1,22 @@
+{% block header %}
+<header>
+        <h1 style="text-align: center">Федеральная налоговая служба</h1>
+            <div>
+                <ul class="hormenu">
+                    <li class="hormenu"><a href="/index" class="hormenu">Главная</a></li>
+                    {% if not user %}
+                    <li class="hormenu"><a href="/login" class="hormenu">Войти</a></li>
+                    <li class="hormenu"><a href="/signup" class="hormenu">Зарегистрироваться</a></li>
+                    {% else %}
+                    <li class="hormenu"><a href="#popup" class="hormenu js-open-modal">Оплатить</a></li>
+                    <li class="hormenu"><a href="/nalogs" class="hormenu">Узнать задолжности</a></li>
+                    <li class="hormenu"><a href="/logout" class="hormenu">Выйти</a></li>
+                    Здравствуйте, {{user.username}}! Ваш ИНН: {{user.inn}}
+                    {% if user.username == 'admin' %}
+                    <li class="hormenu"><a href="/admin" class="hormenu">Админ-панель</a></li>
+                    {% endif %}
+                    {% endif %}
+                </ul>
+            </div>
+</header>
+{% endblock %}
