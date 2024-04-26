@@ -2,7 +2,8 @@ import os
 from datetime import datetime
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import ForeignKey
-from flask import Flask, session, jsonify, send_from_directory, redirect, url_for, request, render_template, make_response
+# from sqlalchemy_imageattach.entity import Image, image_attachment
+from flask import Flask, session, jsonify, flash, send_from_directory, redirect, url_for, request, render_template, make_response
 from werkzeug.utils import secure_filename
 
 
@@ -19,8 +20,6 @@ class User(db.Model):
     email = db.Column(db.String(128), unique=True, nullable=False)
     password = db.Column(db.String(128), nullable=False)
 
-    # def __init__(self, email):
-    #     self.email = email
     def json(self):
         return {'id': self.id, 'username': self.username, 'email': self.email, 'password': self.password}
 
@@ -29,13 +28,19 @@ class Alert(db.Model):
     __tablename__ = 'alerts'
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    image = db.Column(db.LargeBinary, nullable=True)  # null = FALSE in prod
+    # image = db.Column(db.LargeBinary, nullable=True)
     user_id = db.Column(db.Integer, ForeignKey("users.id"))
     location = db.Column(db.String(200), nullable=False)
     date_created = db.Column(db.DateTime, default=datetime.now)
 
-    def __init__(self, id):
-        return {'Alert': self.id}
+    def json(self):
+        return {'id': self.id, 'user_id': self.user_id, 'location': self.location, 'date_created': self.date_created, 'image': 'Null'}
+
+    def save_image(self, image):
+        self.image = image
+
+    def get_image(self):
+        return self.image
 
 
 with app.app_context():
@@ -49,11 +54,11 @@ def test():
 
 @app.route("/")
 def home():
-    # Проверяем, аутентифицирован ли пользователь
     if "user_id" not in session:
-        return redirect(url_for("login"))  # Если пользователь не аутентифицирован, перенаправляем его на страницу входа
+        error = "Для просмотра оповещений необходима авторизация"
+        flash(error)
+        return redirect(url_for("login"))
     user_id = session["user_id"]
-    # Получаем алерты пользователя из базы данных
     alerts = Alert.query.filter_by(user_id=user_id).all()
     return render_template("home.html", alerts=alerts)
 
@@ -68,10 +73,12 @@ def login():
         user = User.query.filter_by(username=username, password=password).first()
         if user:
             session["username"] = user.username
+            session["user_id"] = user.id
             return redirect(url_for("home"))
         else:
             error = "Неверные учетные данные. Пожалуйста, попробуйте еще раз."
-    return render_template("login.html", error=error)
+            flash(error)
+    return render_template("login.html")
 
 
 @app.route("/register", methods=["GET", "POST"])
@@ -81,37 +88,61 @@ def register():
         username = data.get("username")
         email = data.get("email")
         password = data.get("password")
+
+        if not (username and email and password):
+            error = "Необходимо заполнить все поля"
+            return render_template("register.html", error=error)
+
         existing_user = User.query.filter_by(username=username).first()
         if existing_user:
-            return "Username already exists"
+            error = "Такое имя пользователя уже существует"
+            return render_template("register.html", error=error)
+
         new_user = User(username=username, email=email, password=password)
         db.session.add(new_user)
         db.session.commit()
-        return "User registered successfully"
-    return render_template("login.html")
+        success = "Пользователь зарегистрирован!"
+        return render_template("login.html", success=success)
+    return render_template("register.html")
 
 
-@app.route('/users', methods=['POST'])
-def create_user():
-    try:
-        data = request.get_json()
-        new_user = User(username=data['username'], email=data['email'], password=data['password'])
-        db.session.add(new_user)
-        db.session.commit()
-        return make_response(jsonify({'message': 'user created'}), 201)
-    except Exception:
-        return make_response(jsonify({'message': 'error creating user'}), 500)
+@app.route('/logout', methods=['POST'])
+def logout():
+    if 'user_id' in session:
+        session.pop('user_id', None)
+        session.pop('username', None)
+    return redirect(url_for('login'))
+
+
+# @app.route('/users', methods=['POST'])
+# def create_user():
+#     try:
+#         data = request.get_json()
+#         new_user = User(username=data['username'], email=data['email'], password=data['password'])
+#         db.session.add(new_user)
+#         db.session.commit()
+#         return make_response(jsonify({'message': 'user created'}), 201)
+#     except Exception:
+#         return make_response(jsonify({'message': 'error creating user'}), 500)
 
 
 @app.route('/alerts', methods=['POST'])
 def create_alert():
     try:
-        data = request.get_json()
-        new_alert = Alert(image=data['image'], user_id=data['user_id'], location=data['location'], date_created=datetime.now)
+        data = request.form
+        user_id = data.get('user_id')
+        location = data.get('location')
+
+        if user_id is None or location is None:
+            return make_response(jsonify({'message': 'user_id and location are required fields'}), 400)
+
+        new_alert = Alert(user_id=user_id, location=location)
         db.session.add(new_alert)
         db.session.commit()
+
         return make_response(jsonify({'message': 'alert created'}), 201)
-    except Exception:
+    except Exception as e:
+        print(e)
         return make_response(jsonify({'message': 'error creating alert'}), 500)
 
 
@@ -146,26 +177,26 @@ def get_alerts():
         return make_response(jsonify({'message': 'error getting alerts'}), 500)
 
 
-@app.route("/static/<path:filename>")
-def staticfiles(filename):
-    return send_from_directory(app.config["STATIC_FOLDER"], filename)
+# @app.route("/static/<path:filename>")
+# def staticfiles(filename):
+#     return send_from_directory(app.config["STATIC_FOLDER"], filename)
 
 
-@app.route("/media/<path:filename>")
-def mediafiles(filename):
-    return send_from_directory(app.config["MEDIA_FOLDER"], filename)
+# @app.route("/media/<path:filename>")
+# def mediafiles(filename):
+#     return send_from_directory(app.config["MEDIA_FOLDER"], filename)
 
 
-@app.route("/upload", methods=["GET", "POST"])
-def upload_file():
-    if request.method == "POST":
-        file = request.files["file"]
-        filename = secure_filename(file.filename)
-        file.save(os.path.join(app.config["MEDIA_FOLDER"], filename))
-    return """
-    <!doctype html>
-    <title>upload new File</title>
-    <form action="" method=post enctype=multipart/form-data>
-      <p><input type=file name=file><input type=submit value=Upload>
-    </form>
-    """
+# @app.route("/upload", methods=["GET", "POST"])
+# def upload_file():
+#     if request.method == "POST":
+#         file = request.files["file"]
+#         filename = secure_filename(file.filename)
+#         file.save(os.path.join(app.config["MEDIA_FOLDER"], filename))
+#     return """
+#     <!doctype html>
+#     <title>upload new File</title>
+#     <form action="" method=post enctype=multipart/form-data>
+#       <p><input type=file name=file><input type=submit value=Upload>
+#     </form>
+#     """

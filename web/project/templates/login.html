@@ -3,31 +3,34 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login</title>
+    <title>Вход</title>
 </head>
 <body>
-	<h1>Login</h1>
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            <ul class="flash-messages">
+                {% for message in messages %}
+                    <li>{{ message }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+    {% endwith %}
     {% if error %}
         <p style="color: red;">{{ error }}</p>
     {% endif %}
-    <h2>Login</h2>
+	{% if success %}
+        <p style="color: green;">{{ success }}</p>
+    {% endif %}
+    <h2>Вход в личный кабинет</h2>
     <form action="/login" method="POST">
-        <label for="login-username">Username:</label><br>
+        <label for="login-username">Имя пользователя:</label><br>
         <input type="text" id="login-username" name="username"><br>
-        <label for="login-password">Password:</label><br>
+        <label for="login-password">Пароль:</label><br>
         <input type="password" id="login-password" name="password"><br><br>
-        <input type="submit" value="Login">
+        <input type="submit" value="Войти">
     </form>
     <br><br>
-    <h2>Register</h2>
-    <form action="/register" method="POST">
-        <label for="register-username">Username:</label><br>
-        <input type="text" id="register-username" name="username"><br>
-        <label for="register-email">Email:</label><br>
-        <input type="email" id="register-email" name="email"><br>
-        <label for="register-password">Password:</label><br>
-        <input type="password" id="register-password" name="password"><br><br>
-        <input type="submit" value="Register">
+    <p>Нет аккаунта?<a href="/register">Зарегистрироваться</a></p>
     </form>
 </body>
 </html>

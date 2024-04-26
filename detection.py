@@ -3,6 +3,7 @@ from PyQt5.QtGui import QImage
 import cv2
 import numpy as np
 import time
+import requests
 
 
 
@@ -89,3 +90,20 @@ class Detection(QThread):
     def save_detection(self, frame):
         cv2.imwrite('saved_frame/frame.jpg', frame)
         print('Frame saved')
+        self.post_detection()
+        
+    def post_detection(self):
+        try:
+            url = 'http://localhost:1337/alerts'
+            # headers = {'Authorization': 'Token ' + self.token}
+            # files = {'image': open('saved_frame/frame.jpg', 'rb')}
+            data = {"user_id": 1,"location": "gde"}
+            response = requests.post(url, data=data)  
+	    	# HTTP 200
+            if response.ok:
+                print('Alert was sent to the server')
+	    	# Bad response
+            else:
+                print('Unable to send alert to the server') 
+        except Exception:
+            print('Unable to access server')

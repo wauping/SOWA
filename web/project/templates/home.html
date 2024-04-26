@@ -3,9 +3,56 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Home</title>
+    <title>Личный кабинет</title>
 </head>
 <body>
-    <h2>Hi, {{ session.get('username') }}</h2>
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            <ul class="flash-messages">
+                {% for message in messages %}
+                    <li>{{ message }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+    {% endwith %}
+
+    {% if session.get('username') %}
+        <h2>Здравствуйте, {{ session.get('username') }} !</h2>
+    
+
+    <form action="/logout" method="POST">
+        <button type="submit">Выйти из аккаунта</button>
+    </form>
+
+    <h3>Ваши оповещения:</h3>
+    <table>
+        <tr>
+            <th>ID</th>
+            <th>Скрин</th>
+            <th>Местонахождение</th>
+            <th>Время</th>
+        </tr>
+        {% for alert in alerts %}
+        <tr>
+            <td>{{ alert.id }}</td>
+            <td><img src="data:image/jpeg;base64,{{ alert.image }}" alt="Alert Image"></td>
+            <td>{{ alert.location }}</td>
+            <td>{{ alert.date_created }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+    <button onclick="goBack()">Назад</button>
+        <script>
+            function goBack() {
+                window.history.back();
+            }
+        </script>
+
+    {% else %}
+
+    <form action="/login" method="POST">
+        <button type="submit">Войти в аккаунт</button>
+    </form>
+    {% endif %}
 </body>
 </html>
