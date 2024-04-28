@@ -17,7 +17,7 @@ class Detection(QThread):
 
     def run(self):
         self.running = True
-        net = cv2.dnn.readNet("weights/best.onnx", "cfg/yolov8.yaml") 
+        net = cv2.dnn.readNet("weights/best_3.onnx", "cfg/yolov8.yaml") 
         # classes = []
         # with open('obj.names', 'r') as f:
         #     classes = [line.strip() for line in f.readlines()]
@@ -52,7 +52,7 @@ class Detection(QThread):
                     confidence = outs[0][0][4][i]  
                     
 
-                    if confidence > 0.2:
+                    if confidence > 0.5:
                         center_x = int(x)
                         center_y = int(y)
                         w = int(w)
