@@ -1,6 +1,6 @@
 import os
-from datetime import datetime
 from flask_sqlalchemy import SQLAlchemy
+from datetime import datetime
 from sqlalchemy import ForeignKey
 # from sqlalchemy_imageattach.entity import Image, image_attachment
 from flask import Flask, session, jsonify, flash, send_from_directory, redirect, url_for, request, render_template, make_response
@@ -28,19 +28,13 @@ class Alert(db.Model):
     __tablename__ = 'alerts'
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    # image = db.Column(db.LargeBinary, nullable=True)
+    image = db.Column(db.String(100))
     user_id = db.Column(db.Integer, ForeignKey("users.id"))
     location = db.Column(db.String(200), nullable=False)
     date_created = db.Column(db.DateTime, default=datetime.now)
 
     def json(self):
         return {'id': self.id, 'user_id': self.user_id, 'location': self.location, 'date_created': self.date_created, 'image': 'Null'}
-
-    def save_image(self, image):
-        self.image = image
-
-    def get_image(self):
-        return self.image
 
 
 with app.app_context():
@@ -114,6 +108,10 @@ def logout():
     return redirect(url_for('login'))
 
 
+@app.route("/back_to_login", methods=["POST"])
+def back_to_login():
+    return redirect("/login")
+
 # @app.route('/users', methods=['POST'])
 # def create_user():
 #     try:
@@ -132,11 +130,13 @@ def create_alert():
         data = request.form
         user_id = data.get('user_id')
         location = data.get('location')
+        image = data.get('image')
+        print(image)
 
         if user_id is None or location is None:
             return make_response(jsonify({'message': 'user_id and location are required fields'}), 400)
 
-        new_alert = Alert(user_id=user_id, location=location)
+        new_alert = Alert(user_id=user_id, location=location, image=image)
         db.session.add(new_alert)
         db.session.commit()
 
@@ -177,9 +177,9 @@ def get_alerts():
         return make_response(jsonify({'message': 'error getting alerts'}), 500)
 
 
-# @app.route("/static/<path:filename>")
-# def staticfiles(filename):
-#     return send_from_directory(app.config["STATIC_FOLDER"], filename)
+@app.route("/static/img/<path:filename>")
+def staticfiles(filename):
+    return send_from_directory(app.config["STATIC_FOLDER"], filename)
 
 
 # @app.route("/media/<path:filename>")

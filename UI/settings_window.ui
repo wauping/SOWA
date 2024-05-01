@@ -75,7 +75,7 @@
      </rect>
     </property>
     <property name="text">
-     <string>Номер мобильного телефона или адрес электронной почты:</string>
+     <string>Номер мобильного телефона:</string>
     </property>
     <property name="wordWrap">
      <bool>true</bool>

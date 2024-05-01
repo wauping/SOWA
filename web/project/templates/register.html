@@ -4,23 +4,47 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Регистрация</title>
+    <!-- Подключаем файл Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body>
-    {% if error %}
-        <p style="color: red;">{{ error }}</p>
-    {% endif %}
-    <h2>Регистрация</h2>
-    <form action="/register" method="POST">
-        <input type="text" name="username" placeholder="Username" required><br>
-        <input type="email" name="email" placeholder="Email" required><br>
-        <input type="password" name="password" placeholder="Password" required><br>
-        <button type="submit">Зарегистрироваться</button>
-        <button onclick="goBack()">Назад</button>
-        <script>
-            function goBack() {
-                window.history.back();
-            }
-        </script>
-    </form>
+    <div class="container">
+        <!-- Форма регистрации -->
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+                <h2 class="mb-3">Регистрация</h2>
+                {% if error %}
+                <div class="alert alert-danger" role="alert">
+                    {{ error }}
+                </div>
+                {% endif %}
+                <form action="/register" method="POST">
+                    <div class="mb-3">
+                        <input type="text" class="form-control" name="username" placeholder="Username" required>
+                    </div>
+                    <div class="mb-3">
+                        <input type="email" class="form-control" name="email" placeholder="Email" required>
+                    </div>
+                    <div class="mb-3">
+                        <input type="password" class="form-control" name="password" placeholder="Password" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Зарегистрироваться</button>
+                </form>
+                <!-- Кнопка "Назад" -->
+                <button class="btn btn-secondary mt-3" id="backButton">Назад</button>
+                <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+                <script>
+                    $(document).ready(function() {
+                        $("#backButton").click(function() {
+                            window.location.href = "/login";
+                        });
+                    });
+                </script>
+            </div>
+        </div>
+    </div>
+
+    <!-- Подключаем файл Bootstrap JavaScript (по желанию) -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
