@@ -177,7 +177,7 @@ def get_alerts():
         return make_response(jsonify({'message': 'error getting alerts'}), 500)
 
 
-@app.route("/static/img/<path:filename>")
+@app.route("/static/<path:filename>")
 def staticfiles(filename):
     return send_from_directory(app.config["STATIC_FOLDER"], filename)
 

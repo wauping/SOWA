@@ -2,7 +2,10 @@ cfg
 weights
 VIDEO
 saved_frame
-build/
+web\project\media
+web\project\static
+build
 desktop.exe
 desktop.spec
+web\project\__pycache__
 __pycache__

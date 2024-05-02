@@ -43,9 +43,9 @@ class LoginWindow(QMainWindow):
                 QMessageBox.warning(self, 'Ошибка', 'Неверное имя пользователя или пароль')
                 return False
             else:
-                print('Unable to retrieve user data from the server')
+                QMessageBox.warning(self, 'Ошибка', 'Не удалось получить данные с сервера')
                 return False
         except Exception as e:
-            print(f'Error: {e}')
+            QMessageBox.warning(self, 'Ошибка', 'Не удалось обратиться к серверу')
             return False
 

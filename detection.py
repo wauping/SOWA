@@ -2,7 +2,7 @@ from PyQt5.QtCore import QThread, Qt, pyqtSignal
 from PyQt5.QtGui import QImage
 import cv2
 import numpy as np
-import time, requests, os
+import time, requests, os, sys
 import login_window
 
 
@@ -14,7 +14,14 @@ def clear_frames_directory():
             if os.path.isfile(file_path):
                 os.unlink(file_path)
         except Exception as e:
-            print(f"Error deleting {file_path}: {e}")          
+            print(f"Error deleting {file_path}: {e}")         
+
+       
+def adjust_gamma(image, gamma):
+        invGamma = 1.0 / gamma
+        table = np.array([((i / 255.0) ** invGamma) * 255
+        for i in np.arange(0, 256)]).astype("uint8")
+        return cv2.LUT(image, table) 
 
 
 class Detection(QThread):
@@ -23,13 +30,13 @@ class Detection(QThread):
     def __init__(self):
         super().__init__()
 
+
     def run(self):
         self.running = True
         net = cv2.dnn.readNet("weights/best_3.onnx", "cfg/yolov8.yaml") 
 
         layer_names = net.getLayerNames()
         output_layers = [layer_names[i - 1] for i in net.getUnconnectedOutLayers()]
-        print(output_layers)
 
         starting_time = time.time()
         
@@ -42,7 +49,13 @@ class Detection(QThread):
         while self.running:
             ret, frame = cap.read()
             if ret:
-                blob = cv2.dnn.blobFromImage(frame, 0.00392, (640, 640), (0, 0, 0), True, crop=False)
+                gamma_corrected = adjust_gamma(frame, gamma=1.0)
+                
+                img_yuv = cv2.cvtColor(gamma_corrected, cv2.COLOR_BGR2YUV)
+                img_yuv[:,:,0] = cv2.equalizeHist(img_yuv[:,:,0])
+                corrected_frame = cv2.cvtColor(img_yuv, cv2.COLOR_YUV2BGR)
+                
+                blob = cv2.dnn.blobFromImage(corrected_frame, 0.00392, (640, 640), (0, 0, 0), True, crop=False)
                 net.setInput(blob)
                 outs = net.forward(output_layers)
                 for i in range(outs[0][0][0].shape[0]):
@@ -54,7 +67,7 @@ class Detection(QThread):
                     confidence = outs[0][0][4][i]  
                     
 
-                    if confidence > 0.85:
+                    if confidence > 0.75:
                         center_x = int(x)
                         center_y = int(y)
                         w = int(w)
@@ -71,8 +84,8 @@ class Detection(QThread):
                         # indexes = cv2.dnn.NMSBoxes(boxes, confidences, 0.8, 0.3)
                         # for i in range(len(boxes)):
                             # cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 0, 255), 2)
-                        cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 0, 255), 1)
-                        cv2.putText(frame, 'pistol' + " {0:.1%}".format(confidence), (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.9, (0, 0, 255), 1)
+                        cv2.rectangle(frame, (x, y), (x + w, y + h), (255, 119, 0), 1)
+                        cv2.putText(frame, 'pistol' + " {0:.1%}".format(confidence), (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.9, (255, 119, 0), 1)
                         elapsed_time = starting_time - time.time()
                         if elapsed_time <= -10:
                             starting_time = time.time()
@@ -83,7 +96,7 @@ class Detection(QThread):
                 h, w, ch = rgbImage.shape
                 bytesPerLine = ch * w
                 convertToQtFormat = QImage(rgbImage.data, w, h, bytesPerLine, QImage.Format_RGB888)
-                p = convertToQtFormat.scaled(1500, 953, Qt.KeepAspectRatio)
+                p = convertToQtFormat.scaled(640, 640, Qt.KeepAspectRatio)
                 self.changePixmap.emit(p)
 
             time.sleep(0.1)
@@ -91,7 +104,6 @@ class Detection(QThread):
         cv2.destroyAllWindows()
     
     def save_detection(self, frame):
-        # filename = f'E:\\UNIVERSITY\\DIPLOM\\SOWA\\web\\project\\media\\frame_{login_window.sesh[""]}.jpg'
         url = 'http://localhost:1337/alerts'
         response = requests.get(url)
         if response.ok:
@@ -103,27 +115,34 @@ class Detection(QThread):
                         new_alert_id = alert['id'] + 1
                         break
         if new_alert_id is not None:       
-            filename = f'E:\\UNIVERSITY\\DIPLOM\\SOWA\\web\\project\\media\\frame_{new_alert_id}.jpg'
-            frame_name = f'frame_{new_alert_id}.jpg'
+            filename = f'E:\\UNIVERSITY\\DIPLOM\\SOWA\\web\\project\\media\\frame-{new_alert_id}.jpg'
+            frame_name = f'frame-{new_alert_id}.jpg'
         else:
-            filename = f'E:\\UNIVERSITY\\DIPLOM\\SOWA\\web\\project\\media\\frame_1.jpg'
-            frame_name = 'frame_1.jpg'
+            filename = f'E:\\UNIVERSITY\\DIPLOM\\SOWA\\web\\project\\media\\frame-1.jpg'
+            frame_name = 'frame-1.jpg'
 
         cv2.imwrite(filename, frame)
         print(f'Frame saved as {frame_name}')
-        self.post_detection(frame_name)
+        self.post_detection(filename)
 
-    def post_detection(self, image):
+    def post_detection(self, image_path):
         try:
+            with open(image_path, 'rb') as file:
+                files = {'file': file}
+                
+                upload_image = requests.post('https://transfer.adttemp.com.br/', files=files)
+                print(upload_image.text)
+
             url = 'http://localhost:1337/alerts'
             data = {"user_id": login_window.sesh['user_id'],
-                    "location": login_window.sesh['location']}
+                    "location": login_window.sesh['location'],
+                    "image": upload_image.text}
             response = requests.post(url, data=data)
             print(data)
-	    	# HTTP 200
+            # HTTP 200
             if response.ok:
                 print('Alert was sent to the server')
-	    	# Bad response
+            # Bad response
             else:
                 print('Unable to send alert to the server') 
         except Exception:

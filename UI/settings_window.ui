@@ -25,6 +25,11 @@
   <property name="windowTitle">
    <string>SOWA</string>
   </property>
+  <property name="windowIcon">
+   <iconset>
+    <normaloff>.\ICON.png</normaloff>
+   </iconset>
+  </property>
   <widget class="QWidget" name="centralwidget">
    <widget class="QLabel" name="label_name">
     <property name="geometry">
