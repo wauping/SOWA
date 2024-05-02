@@ -2,3 +2,7 @@ cfg
 weights
 VIDEO
 saved_frame
+build/
+desktop.exe
+desktop.spec
+__pycache__
