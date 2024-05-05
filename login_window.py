@@ -46,6 +46,7 @@ class LoginWindow(QMainWindow):
                 QMessageBox.warning(self, 'Ошибка', 'Не удалось получить данные с сервера')
                 return False
         except Exception as e:
+            print(e)
             QMessageBox.warning(self, 'Ошибка', 'Не удалось обратиться к серверу')
             return False
 

@@ -1,10 +1,7 @@
-import os
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 from sqlalchemy import ForeignKey
-# from sqlalchemy_imageattach.entity import Image, image_attachment
 from flask import Flask, session, jsonify, flash, send_from_directory, redirect, url_for, request, render_template, make_response
-from werkzeug.utils import secure_filename
 
 
 app = Flask(__name__)
@@ -21,7 +18,10 @@ class User(db.Model):
     password = db.Column(db.String(128), nullable=False)
 
     def json(self):
-        return {'id': self.id, 'username': self.username, 'email': self.email, 'password': self.password}
+        return {'id': self.id,
+                'username': self.username,
+                'email': self.email,
+                'password': self.password}
 
 
 class Alert(db.Model):
@@ -34,16 +34,15 @@ class Alert(db.Model):
     date_created = db.Column(db.DateTime, default=datetime.now)
 
     def json(self):
-        return {'id': self.id, 'user_id': self.user_id, 'location': self.location, 'date_created': self.date_created, 'image': 'Null'}
+        return {'id': self.id,
+                'user_id': self.user_id,
+                'location': self.location,
+                'date_created': self.date_created,
+                'image': self.image}
 
 
 with app.app_context():
     db.create_all()
-
-
-@app.route('/test', methods=['GET'])
-def test():
-    return make_response(jsonify({'message': 'test route'}), 200)
 
 
 @app.route("/")
@@ -108,22 +107,6 @@ def logout():
     return redirect(url_for('login'))
 
 
-@app.route("/back_to_login", methods=["POST"])
-def back_to_login():
-    return redirect("/login")
-
-# @app.route('/users', methods=['POST'])
-# def create_user():
-#     try:
-#         data = request.get_json()
-#         new_user = User(username=data['username'], email=data['email'], password=data['password'])
-#         db.session.add(new_user)
-#         db.session.commit()
-#         return make_response(jsonify({'message': 'user created'}), 201)
-#     except Exception:
-#         return make_response(jsonify({'message': 'error creating user'}), 500)
-
-
 @app.route('/alerts', methods=['POST'])
 def create_alert():
     try:
@@ -182,21 +165,6 @@ def staticfiles(filename):
     return send_from_directory(app.config["STATIC_FOLDER"], filename)
 
 
-# @app.route("/media/<path:filename>")
-# def mediafiles(filename):
-#     return send_from_directory(app.config["MEDIA_FOLDER"], filename)
-
-
-# @app.route("/upload", methods=["GET", "POST"])
-# def upload_file():
-#     if request.method == "POST":
-#         file = request.files["file"]
-#         filename = secure_filename(file.filename)
-#         file.save(os.path.join(app.config["MEDIA_FOLDER"], filename))
-#     return """
-#     <!doctype html>
-#     <title>upload new File</title>
-#     <form action="" method=post enctype=multipart/form-data>
-#       <p><input type=file name=file><input type=submit value=Upload>
-#     </form>
-#     """
+@app.route("/media/<path:filename>")
+def mediafiles(filename):
+    return send_from_directory(app.config["MEDIA_FOLDER"], filename)

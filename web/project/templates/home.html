@@ -51,10 +51,15 @@
         .card-text {
             margin-left: 20px;
         }
+
+        .babyblue {
+            background-color: rgb(0, 119, 255);
+        }
     </style>
 </head>
 <body>
-    <div class="header">
+    <div class="header babyblue">
+        <img src="{{ url_for('static', filename='ICON.png') }}" alt="Logo" width="150" height="auto">
         <h1>Личный кабинет</h1>
         {% if session.get('username') %}
             <h3>Здравствуйте, {{ session.get('username') }}!</h3>
@@ -94,7 +99,7 @@
                         <div class="card-text">
                             <p><strong>ID:</strong> {{ alert.id }}</p>
                             <p><strong>Местонахождение:</strong> {{ alert.location }}</p>
-                            <p><strong>Время:</strong> {{ alert.date_created }}</p>
+                            <p><strong>Время:</strong> {{ alert.date_created.strftime('%Y-%m-%d %H:%M:%S') }}</p>
                         </div>
                     </div>
                 </div>

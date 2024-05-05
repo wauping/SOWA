@@ -8,7 +8,11 @@
     <link rel="shortcut icon" href="{{ url_for('static', filename='ICON.ico') }}">
 </head>
 <body>
+    <div style="align-self: start">
+        <img src="{{ url_for('static', filename='ICON.png') }}" alt="Logo" width="150" height="auto">
+    </div>
     <div class="container">
+        
         {% with messages = get_flashed_messages() %}
         {% if messages %}
         <div class="alert alert-info" role="alert">
@@ -20,7 +24,7 @@
         </div>
         {% endif %}
         {% endwith %}
-
+        
         <div class="row justify-content-center">
             <div class="col-md-6">
                 <h2 class="mb-3">Вход в личный кабинет</h2>

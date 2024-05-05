@@ -67,7 +67,7 @@ class Detection(QThread):
                     confidence = outs[0][0][4][i]  
                     
 
-                    if confidence > 0.75:
+                    if confidence > 0.8:
                         center_x = int(x)
                         center_y = int(y)
                         w = int(w)
@@ -145,6 +145,7 @@ class Detection(QThread):
             # Bad response
             else:
                 print('Unable to send alert to the server') 
-        except Exception:
+        except Exception as e:
+            print(e)
             print('Unable to access server')
   
