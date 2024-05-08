@@ -3,10 +3,23 @@ from PyQt5.QtCore import QUrl
 from PyQt5.uic import loadUi
 from PyQt5.QtGui import QDesktopServices
 from settings_window import SettingsWindow
-import requests
+import requests,os
+import smtplib
+from dotenv import load_dotenv
 
 
 sesh = {}
+
+
+load_dotenv('.env.prod')
+
+
+smtpObj = smtplib.SMTP('smtp.gmail.com', 587)
+smtpObj.ehlo()
+smtpObj.starttls()
+smtpObj.ehlo()
+smtpObj.login('sowa.notifi@gmail.com', os.getenv('EMAIL_PASSWORD'))
+
 
 class LoginWindow(QMainWindow):
     def __init__(self):
@@ -36,6 +49,7 @@ class LoginWindow(QMainWindow):
                     if user['username'] == username and user['password'] == password:
                         sesh['username'] = username
                         sesh['user_id'] = user['id']
+                        sesh['user_email'] = user['email']
                         print(username, password)
                         self.settings_window = SettingsWindow()
                         self.settings_window.display_info()

@@ -92,6 +92,11 @@ def register():
             error = "Такое имя пользователя уже существует"
             return render_template("register.html", error=error)
 
+        existing_user = User.query.filter_by(email=email).first()
+        if existing_user:
+            error = "Некорректный почтовый адрес"
+            return render_template("register.html", error=error)
+
         new_user = User(username=username, email=email, password=password)
         db.session.add(new_user)
         db.session.commit()

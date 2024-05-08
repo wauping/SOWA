@@ -16,7 +16,7 @@ def clear_frames_directory():
         except Exception as e:
             print(f"Error deleting {file_path}: {e}")         
 
-       
+   
 def adjust_gamma(image, gamma):
         invGamma = 1.0 / gamma
         table = np.array([((i / 255.0) ** invGamma) * 255
@@ -125,6 +125,7 @@ class Detection(QThread):
         self.post_detection(filename)
 
     def post_detection(self, image_path):
+        
         try:
             with open(image_path, 'rb') as file:
                 files = {'file': file}
@@ -141,6 +142,8 @@ class Detection(QThread):
             # HTTP 200
             if response.ok:
                 print('Alert was sent to the server')
+                login_window.smtpObj.sendmail("sowa.notification@gmail.com", login_window.sesh['user_email'], 
+                              f" {login_window.sesh['username']}! \n\n Система SOWA обнаружила огнестрельное  оружие! \n\n Местоположение: {login_window.sesh['location']}".encode('utf-8'))
             # Bad response
             else:
                 print('Unable to send alert to the server') 
