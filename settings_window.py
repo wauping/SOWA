@@ -1,4 +1,4 @@
-from PyQt5.QtWidgets import QMainWindow, QMessageBox
+from PyQt5.QtWidgets import QMainWindow
 from PyQt5.uic import loadUi
 from detection_window import DetectionWindow
 import login_window, detection

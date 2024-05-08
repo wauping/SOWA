@@ -2,7 +2,7 @@ from PyQt5.QtCore import QThread, Qt, pyqtSignal
 from PyQt5.QtGui import QImage
 import cv2
 import numpy as np
-import time, requests, os, sys
+import time, requests, os
 import login_window
 
 
@@ -59,7 +59,6 @@ class Detection(QThread):
                 net.setInput(blob)
                 outs = net.forward(output_layers)
                 for i in range(outs[0][0][0].shape[0]):
-                    # print(outs[0][0][0].shape[0])
                     x = outs[0][0][0][i]
                     y = outs[0][0][1][i]
                     w = outs[0][0][2][i]
@@ -74,16 +73,6 @@ class Detection(QThread):
                         h = int(h)
                         x = int(center_x - w / 2)
                         y = int(center_y - h / 2)
-                        # boxes.append(w, h, x ,y)
-                        # x1 = int((x - w / 2))
-                        # y1 = int((y - h / 2))
-                        # x2 = int((x + w / 2))
-                        # y2 = int((y + h / 2))
-                        # boxes.append([x, y, w, h])
-                        # confidences.append(float(confidence))
-                        # indexes = cv2.dnn.NMSBoxes(boxes, confidences, 0.8, 0.3)
-                        # for i in range(len(boxes)):
-                            # cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 0, 255), 2)
                         cv2.rectangle(frame, (x, y), (x + w, y + h), (255, 119, 0), 1)
                         cv2.putText(frame, 'pistol' + " {0:.1%}".format(confidence), (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.9, (255, 119, 0), 1)
                         elapsed_time = starting_time - time.time()

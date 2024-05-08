@@ -5,6 +5,7 @@ from PyQt5.QtGui import QDesktopServices
 from settings_window import SettingsWindow
 import requests
 
+
 sesh = {}
 
 class LoginWindow(QMainWindow):
