@@ -1,6 +1,7 @@
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime, timezone
 from sqlalchemy import ForeignKey
+from sqlalchemy.sql import func
 from flask import Flask, session, jsonify, flash, send_from_directory, redirect, url_for, request, render_template, make_response
 
 
@@ -31,7 +32,7 @@ class Alert(db.Model):
     image = db.Column(db.String(100))
     user_id = db.Column(db.Integer, ForeignKey("users.id"))
     location = db.Column(db.String(200), nullable=False)
-    date_created = db.Column(db.DateTime, default=datetime.now(timezone.utc))
+    date_created = db.Column(db.DateTime(timezone=True), server_default=func.now())
 
     def json(self):
         return {'id': self.id,

@@ -58,6 +58,8 @@ class Detection(QThread):
                 blob = cv2.dnn.blobFromImage(corrected_frame, 0.00392, (640, 640), (0, 0, 0), True, crop=False)
                 net.setInput(blob)
                 outs = net.forward(output_layers)
+                boxes = []
+                confidences = []
                 for i in range(outs[0][0][0].shape[0]):
                     x = outs[0][0][0][i]
                     y = outs[0][0][1][i]
@@ -73,13 +75,21 @@ class Detection(QThread):
                         h = int(h)
                         x = int(center_x - w / 2)
                         y = int(center_y - h / 2)
+                        boxes.append([x, y, w, h])
+                        confidences.append(float(confidence))
+
+                indexes = cv2.dnn.NMSBoxes(boxes, confidences, 0.8, 0.3)
+                
+                for i in range(len(boxes)):
+                    if i in indexes:
+                        x, y, w, h = boxes[i]
+                        confidence = confidences[i]
                         cv2.rectangle(frame, (x, y), (x + w, y + h), (255, 119, 0), 1)
                         cv2.putText(frame, 'pistol' + " {0:.1%}".format(confidence), (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.9, (255, 119, 0), 1)
                         elapsed_time = starting_time - time.time()
                         if elapsed_time <= -10:
                             starting_time = time.time()
-                            self.save_detection(frame)
-                        
+                            self.save_detection(frame) 
 
                 rgbImage = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
                 h, w, ch = rgbImage.shape
