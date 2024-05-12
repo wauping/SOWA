@@ -7,7 +7,6 @@ import requests,os
 import smtplib
 from dotenv import load_dotenv
 
-
 sesh = {}
 
 
