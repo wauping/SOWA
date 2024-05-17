@@ -60,10 +60,10 @@
      </rect>
     </property>
     <property name="text">
-     <string>Имя пользователя:</string>
+     <string>Логин:</string>
     </property>
    </widget>
-   <widget class="QLineEdit" name="username_input">
+   <widget class="QLineEdit" name="login_input">
     <property name="geometry">
      <rect>
       <x>30</x>

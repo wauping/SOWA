@@ -14,12 +14,14 @@ class User(db.Model):
     __tablename__ = 'users'
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    username = db.Column(db.String(80), unique=True, nullable=False)
+    login = db.Column(db.String(20), unique=True, nullable=False)
+    username = db.Column(db.String(80), unique=False, nullable=False)
     email = db.Column(db.String(128), unique=True, nullable=False)
     password = db.Column(db.String(128), nullable=False)
 
     def json(self):
         return {'id': self.id,
+                'login': self.login,
                 'username': self.username,
                 'email': self.email,
                 'password': self.password}
@@ -62,10 +64,11 @@ def login():
     error = None
     if request.method == "POST":
         data = request.form
-        username = data.get("username")
+        login = data.get("login")
         password = data.get("password")
-        user = User.query.filter_by(username=username, password=password).first()
+        user = User.query.filter_by(login=login, password=password).first()
         if user:
+            session["login"] = user.login
             session["username"] = user.username
             session["user_id"] = user.id
             return redirect(url_for("home"))
@@ -80,16 +83,17 @@ def register():
     if request.method == "POST":
         data = request.form
         username = data.get("username")
+        login = data.get("login")
         email = data.get("email")
         password = data.get("password")
 
-        if not (username and email and password):
+        if not (username and email and password and login):
             error = "Необходимо заполнить все поля"
             return render_template("register.html", error=error)
 
-        existing_user = User.query.filter_by(username=username).first()
+        existing_user = User.query.filter_by(login=login).first()
         if existing_user:
-            error = "Такое имя пользователя уже существует"
+            error = "Такой логин уже существует"
             return render_template("register.html", error=error)
 
         existing_user = User.query.filter_by(email=email).first()
@@ -97,7 +101,7 @@ def register():
             error = "Некорректный почтовый адрес"
             return render_template("register.html", error=error)
 
-        new_user = User(username=username, email=email, password=password)
+        new_user = User(login=login, username=username, email=email, password=password)
         db.session.add(new_user)
         db.session.commit()
         success = "Пользователь зарегистрирован!"
@@ -109,7 +113,7 @@ def register():
 def logout():
     if 'user_id' in session:
         session.pop('user_id', None)
-        session.pop('username', None)
+        session.pop('login', None)
     return redirect(url_for('login'))
 
 

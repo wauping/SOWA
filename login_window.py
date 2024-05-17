@@ -35,9 +35,9 @@ class LoginWindow(QMainWindow):
         QDesktopServices.openUrl(registration_url)
 
     def check_user(self):
-        username = self.username_input.text()
+        login = self.login_input.text()
         password = self.password_input.text()
-        print(username, password)
+        print(login, password)
         
         try:
             url = 'http://localhost:1337/users'
@@ -45,11 +45,12 @@ class LoginWindow(QMainWindow):
             if response.ok:
                 users = response.json()
                 for user in users:
-                    if user['username'] == username and user['password'] == password:
-                        sesh['username'] = username
-                        sesh['user_id'] = user['id']
+                    if user['login'] == login and user['password'] == password:
+                        sesh['username'] = user['username']
                         sesh['user_email'] = user['email']
-                        print(username, password)
+                        sesh['user_id'] = user['id']
+                        sesh['login'] = login
+                        print(login, password)
                         self.settings_window = SettingsWindow()
                         self.settings_window.display_info()
                         self.close()
