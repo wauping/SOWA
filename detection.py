@@ -130,14 +130,17 @@ class Detection(QThread):
             with open(image_path, 'rb') as file:
                 files = {'file': file}
                 
-                upload_image = requests.post('https://transfer.adttemp.com.br/', files=files)
+                upload_image = requests.post('http://punchclub.ru:8080/', files=files)
                 print(upload_image.text)
 
             url = 'http://localhost:1337/alerts'
             data = {"user_id": login_window.sesh['user_id'],
                     "location": login_window.sesh['location'],
                     "image": upload_image.text}
-            response = requests.post(url, data=data)
+            try:
+                response = requests.post(url, data=data)
+            except requests.exceptions.ConnectionError as e:
+                response = "No response"
             print(data)
             # HTTP 200
             if response.ok:

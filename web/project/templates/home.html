@@ -93,6 +93,7 @@
 
         <div class="row justify-content-center">
             <div class="col-md-8">
+                {% if alerts %}
                 {% for alert in alerts %}
                 <div class="card">
                     <div class="card-body">
@@ -105,7 +106,9 @@
                     </div>
                 </div>
                 {% endfor %}
-                
+                {% else %}
+                    <p class="row justify-content-center" style="color: #A9A9A9">У Вас нет записей об обнаружении оружия</p>
+                {% endif %}
             </div>
         </div>
     </div>
