@@ -8,13 +8,13 @@ import smtplib
 from dotenv import load_dotenv
 
 sesh = {}
-load_dotenv('.env.prod')
+load_dotenv('.env')
 
 smtpObj = smtplib.SMTP('smtp.gmail.com', 587)
 smtpObj.ehlo()
 smtpObj.starttls()
 smtpObj.ehlo()
-smtpObj.login('sowa.notifi@gmail.com', os.getenv('EMAIL_PASSWORD'))
+smtpObj.login('sowa.notific@gmail.com', os.getenv('EMAIL_PASSWORD'))
 
 class LoginWindow(QMainWindow):
     def __init__(self):
@@ -23,7 +23,7 @@ class LoginWindow(QMainWindow):
 
         self.register_button.clicked.connect(self.direct_to_register_page)
         self.login_button.clicked.connect(self.check_user)
-        self.settings_window = None  # Добавляем атрибут для settings_window
+        self.settings_window = None
 
         self.show()
 

@@ -7,5 +7,5 @@ desktop.exe
 desktop.spec
 web\project\__pycache__
 __pycache__
-.env.prod.db
-.env.prod
+.env.db
+.env
